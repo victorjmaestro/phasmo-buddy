@@ -1,656 +1,211 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1220" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Phasmo Buddy" />
-  <title>Phasmo Buddy</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <style>
-    :root {
-      --bg: #081018;
-      --bg-2: #101a27;
-      --card: #131f2d;
-      --card-2: #1a2839;
-      --text: #eef4ff;
-      --muted: #95a7bf;
-      --accent: #4fd1c5;
-      --accent-2: #60a5fa;
-      --danger: #f87171;
-      --warn: #fbbf24;
-      --ok: #34d399;
-      --border: rgba(255,255,255,.08);
-      --shadow: 0 12px 24px rgba(0,0,0,.28);
-      --radius: 18px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phasmo Buddy</title>
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; background: linear-gradient(180deg, #060c14, #0b1220 18%, #071018 100%); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { min-height: 100vh; }
-    button, input, select, textarea { font: inherit; }
-    .app { max-width: 900px; margin: 0 auto; padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 98px; }
-    .header { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(14px); background: rgba(8,16,24,.85); border-bottom: 1px solid var(--border); padding: 12px 0 10px; }
-    .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .title-wrap h1 { margin: 0; font-size: 1.35rem; }
-    .title-wrap p { margin: 3px 0 0; color: var(--muted); font-size: .9rem; }
-    .ghost-count { background: linear-gradient(135deg, rgba(96,165,250,.18), rgba(79,209,197,.18)); border: 1px solid var(--border); border-radius: 999px; padding: 9px 12px; font-weight: 700; white-space: nowrap; }
+<style>
+body{margin:0;background:#0b0e13;color:#fff;font-family:Arial}
+.wrap{max-width:1100px;margin:auto;padding:10px}
+.panel{background:#161a22;border-radius:10px;padding:10px;margin-bottom:10px}
 
-    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0 18px; }
-    .tab-btn, .chip, .action-btn, .ghost-pill, .sanity-btn { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 14px; padding: 10px 12px; }
-    .tab-btn.active { background: linear-gradient(135deg, rgba(96,165,250,.2), rgba(79,209,197,.12)); border-color: rgba(96,165,250,.35); }
+button{
+  padding:8px;
+  margin:3px;
+  border-radius:8px;
+  border:1px solid #333;
+  background:#222;
+  color:#fff;
+}
 
-    .panel { display: none; gap: 14px; }
-    .panel.active { display: grid; }
+.on{background:#1f8f4e}
+.off{background:#a73b3b}
 
-    .card { background: linear-gradient(180deg, rgba(19,31,45,.97), rgba(14,22,34,.97)); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; }
-    .card h2, .card h3 { margin: 0 0 10px; }
-    .sub { color: var(--muted); font-size: .92rem; }
-    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ghosts{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .stack { display: grid; gap: 10px; }
+.ghost{
+  padding:10px;
+  border-radius:10px;
+}
 
-    .evidence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .chip {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      min-height: 54px; cursor: pointer; transition: .15s ease;
-    }
-    .chip small { color: var(--muted); display: block; }
-    .chip[data-state="yes"] { background: rgba(52,211,153,.14); border-color: rgba(52,211,153,.45); }
-    .chip[data-state="no"] { background: rgba(248,113,113,.14); border-color: rgba(248,113,113,.45); }
-    .chip[data-state="unknown"] { background: var(--card); }
-    .state-dot { width: 11px; height: 11px; border-radius: 999px; flex: 0 0 auto; }
-    .chip[data-state="yes"] .state-dot { background: var(--ok); }
-    .chip[data-state="no"] .state-dot { background: var(--danger); }
-    .chip[data-state="unknown"] .state-dot { background: #6b7280; }
+.ok{background:#1f8f4e}
+.sus{background:#a67c00}
+.no{background:#a73b3b}
 
-    .ghost-list { display: grid; gap: 10px; }
-    .ghost-card { border: 1px solid var(--border); border-radius: 16px; background: rgba(255,255,255,.02); padding: 12px; }
-    .ghost-card.dim { opacity: .38; }
-    .ghost-name { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-    .ghost-name strong { font-size: 1.02rem; }
-    .ghost-badges, .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ghost-pill, .sanity-btn { padding: 7px 10px; border-radius: 999px; font-size: .82rem; }
-    .ghost-pill.match { background: rgba(52,211,153,.14); border-color: rgba(52,211,153,.4); }
-    .ghost-pill.maybe { background: rgba(251,191,36,.12); border-color: rgba(251,191,36,.35); }
-    .ghost-pill.conflict { background: rgba(248,113,113,.14); border-color: rgba(248,113,113,.4); }
+.small{font-size:12px;opacity:0.9}
 
-    textarea, input[type="text"], select {
-      width: 100%; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-2); color: var(--text); padding: 12px;
-    }
-    textarea { min-height: 92px; resize: vertical; }
-    .action-row { display: flex; flex-wrap: wrap; gap: 10px; }
-    .action-btn { cursor: pointer; }
-    .action-btn.primary { background: linear-gradient(135deg, rgba(96,165,250,.28), rgba(79,209,197,.18)); border-color: rgba(96,165,250,.35); }
-    .action-btn.danger { background: rgba(248,113,113,.14); border-color: rgba(248,113,113,.35); }
-
-    .mini-note { font-size: .84rem; color: var(--muted); }
-    .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .sanity-btn.active { background: rgba(96,165,250,.24); border-color: rgba(96,165,250,.4); }
-
-    .map-list { display: grid; gap: 8px; }
-    .map-item { padding: 11px 12px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--border); }
-    .compare-box { border-left: 3px solid var(--accent-2); padding-left: 12px; }
-    .footer-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; border-top: 1px solid var(--border); background: rgba(7,16,24,.95); backdrop-filter: blur(16px); padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); }
-    .footer-bar .action-row { max-width: 900px; margin: 0 auto; }
-    .muted { color: var(--muted); }
-    .hidden { display: none !important; }
-
-    @media (max-width: 700px) {
-      .grid-2, .grid-3, .evidence-grid { grid-template-columns: 1fr; }
-      .tabs { grid-template-columns: repeat(4, 1fr); }
-      .tab-btn { padding: 10px 8px; font-size: .88rem; }
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <div class="header">
-      <div class="brand">
-        <div class="title-wrap">
-          <h1>Phasmo Buddy</h1>
-          <p>Diario rápido de partida para iPhone</p>
-        </div>
-        <div class="ghost-count" id="ghostCount">27 posibles</div>
-      </div>
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="partida">Partida</button>
-        <button class="tab-btn" data-tab="fantasmas">Fantasmas</button>
-        <button class="tab-btn" data-tab="mapas">Mapas</button>
-        <button class="tab-btn" data-tab="compartir">Compartir</button>
-      </div>
-    </div>
+<div class="wrap">
 
-    <section class="panel active" id="panel-partida">
-      <div class="card stack">
-        <div class="section-title">
-          <h2>Pruebas</h2>
-          <span class="sub">Toca para cambiar: desconocida → confirmada → descartada</span>
-        </div>
-        <div class="evidence-grid" id="evidenceGrid"></div>
-      </div>
+<div class="panel">
+<b>Evidencias</b><br>
+<div id="ev"></div>
+</div>
 
-      <div class="grid-2">
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Pistas rápidas</h2>
-            <span class="sub">Ayuda a acotar sin abrir otra pantalla</span>
-          </div>
-          <div id="quickClues" class="tag-list"></div>
-          <div class="mini-note">Estas pistas no filtran automáticamente. Sirven para cotejar con la lista viva de fantasmas.</div>
-        </div>
+<div class="panel">
+<b>Velocidad</b><br>
+<button id="speedBtn">Sin info</button>
+</div>
 
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Cordura de caza</h2>
-            <span class="sub">Marca lo que crees haber visto</span>
-          </div>
-          <div id="sanityButtons" class="tag-list"></div>
-          <div class="mini-note" id="sanityHint">Sin rango seleccionado.</div>
-        </div>
-      </div>
+<div class="panel">
+<b>Especiales</b><br>
+<button onclick="toggle('salt')">Pisa sal</button>
+<button onclick="toggle('dots')">DOTS visible directo</button>
+</div>
 
-      <div class="grid-2">
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Partida</h2>
-            <span class="sub">Todo lo básico aquí</span>
-          </div>
-          <label>
-            <div class="mini-note">Nombre o apodo de la partida</div>
-            <input type="text" id="matchName" placeholder="Ej. Tanglewood con Carina" />
-          </label>
-          <label>
-            <div class="mini-note">Mapa</div>
-            <select id="mapSelect"></select>
-          </label>
-          <label>
-            <div class="mini-note">Notas rápidas</div>
-            <textarea id="notes" placeholder="Ej. pisa sal pero no deja huellas, apagó luz al instante, hunt raro..."></textarea>
-          </label>
-        </div>
+<div class="panel">
+<b>Fantasmas</b>
+<div class="ghosts" id="ghosts"></div>
+</div>
 
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Posibles ahora</h2>
-            <span class="sub">Se actualiza al instante</span>
-          </div>
-          <div id="shortPossibleList" class="tag-list"></div>
-          <div class="mini-note" id="possibleSummary"></div>
-        </div>
-      </div>
-    </section>
+</div>
 
-    <section class="panel" id="panel-fantasmas">
-      <div class="card stack">
-        <div class="section-title">
-          <h2>Lista completa</h2>
-          <span class="sub">Arriba quedan los que encajan</span>
-        </div>
-        <div class="ghost-list" id="ghostList"></div>
-      </div>
-    </section>
+<script>
 
-    <section class="panel" id="panel-mapas">
-      <div class="grid-2">
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Mapa seleccionado</h2>
-            <span class="sub">Referencia rápida</span>
-          </div>
-          <div id="selectedMapCard"></div>
-        </div>
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Todos los mapas</h2>
-            <span class="sub">Lista actual</span>
-          </div>
-          <div class="map-list" id="allMaps"></div>
-        </div>
-      </div>
-    </section>
+const evidences=["EMF","SpiritBox","Writing","DOTS","Freezing","Orbs","UV"];
+let evState={};
+evidences.forEach(e=>evState[e]=0);
 
-    <section class="panel" id="panel-compartir">
-      <div class="grid-2">
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Exportar partida</h2>
-            <span class="sub">Sin servidor. Solo texto.</span>
-          </div>
-          <textarea id="shareCode" readonly></textarea>
-          <div class="action-row">
-            <button class="action-btn primary" id="copyShareBtn">Copiar código</button>
-            <button class="action-btn" id="refreshShareBtn">Actualizar</button>
-          </div>
-          <div class="mini-note">Pásalo por WhatsApp, Discord o donde te dé la gana.</div>
-        </div>
+let specials={
+  salt:false,
+  dots:false
+};
 
-        <div class="card stack">
-          <div class="section-title">
-            <h2>Cotejar con amigo</h2>
-            <span class="sub">Pega aquí el código de otro</span>
-          </div>
-          <textarea id="importCode" placeholder="Pega aquí el código exportado por tu colega"></textarea>
-          <div class="action-row">
-            <button class="action-btn primary" id="compareBtn">Comparar</button>
-            <button class="action-btn" id="loadRemoteBtn">Cargar datos remotos</button>
-          </div>
-          <div id="compareResult" class="compare-box muted">Nada comparado todavía.</div>
-        </div>
-      </div>
-    </section>
-  </div>
+let speedStates=["Sin info","Lento","Rápido","Variable"];
+let speedIndex=0;
 
-  <div class="footer-bar">
-    <div class="action-row">
-      <button class="action-btn primary" id="saveBtn">Guardar en este iPhone</button>
-      <button class="action-btn" id="newMatchBtn">Nueva partida</button>
-      <button class="action-btn danger" id="resetBtn">Reset total</button>
-    </div>
-  </div>
+const ghosts=[
 
-  <script>
-    const evidenceList = [
-      { key: 'emf5', label: 'EMF 5', hint: 'EMF nivel 5' },
-      { key: 'orb', label: 'Orbe', hint: 'Ghost Orb' },
-      { key: 'spiritBox', label: 'Spirit Box', hint: 'Respuesta por radio' },
-      { key: 'freezing', label: 'Frío', hint: 'Temperaturas heladas' },
-      { key: 'uv', label: 'UV', hint: 'Ultravioleta / huellas' },
-      { key: 'writing', label: 'Escritura', hint: 'Ghost Writing' },
-      { key: 'dots', label: 'DOTS', hint: 'Silueta en DOTS' }
-    ];
+{name:"Spirit",ev:["EMF","SpiritBox","Writing"],info:["Neutral","Sin rasgos claros","Test incienso"]},
 
-    const quickClues = [
-      'No pisa sal', 'Más rápido con LoS', 'Muy lento cerca', 'No airball', 'Apaga cuadro', 'No apaga cuadro',
-      'Huellas raras', 'Orbes falsos', 'DOTS solo en cámara', 'Apaga velas', 'Caza alto por hablar', 'Muy silencioso'
-    ];
+{name:"Wraith",ev:["EMF","SpiritBox","DOTS"],info:["No pisa sal","Flota","Usa sal"],rules:["noSalt"]},
 
-    const sanityRanges = [
-      '≥ 80%', '≥ 70%', '≥ 60%', '≥ 50%', '< 50%', 'Caza a cualquier cordura'
-    ];
+{name:"Phantom",ev:["SpiritBox","UV","DOTS"],info:["Desaparece en foto","Menos visible","Haz foto"]},
 
-    const ghosts = [
-      { name: 'Banshee', evidence: ['orb','uv','dots'], strength: 'Fija objetivo y suele hacer evento cantante.', weakness: 'Parabolic/Sound Recorder con gemidos distintivos.', hunt: 'Normal' },
-      { name: 'Dayan', evidence: ['emf5','orb','spiritBox'], strength: 'Más rápida y caza antes si te mueves cerca.', weakness: 'Más lenta y caza más tarde si te quedas quieto cerca.', hunt: 'Rango variable por movimiento' },
-      { name: 'Demon', evidence: ['freezing','uv','writing'], strength: 'Puede iniciar caza a cualquier cordura.', weakness: 'Crucifijo con más rango.', hunt: 'Puede cazar en cualquier cordura' },
-      { name: 'Deogen', evidence: ['spiritBox','writing','dots'], strength: 'Siempre sabe dónde estás durante la caza.', weakness: 'Muy lenta cuando está pegada a ti.', hunt: 'Normal' },
-      { name: 'Gallu', evidence: ['emf5','spiritBox','uv'], strength: 'Se vuelve agresivo al usar protección.', weakness: 'Tras cazar se calma.', hunt: 'Más alto en estado agresivo' },
-      { name: 'Goryo', evidence: ['emf5','uv','dots'], strength: 'DOTS solo visible en cámara y cuando nadie está en la sala.', weakness: 'No se aleja mucho y no cambia de sala favorita.', hunt: 'Normal' },
-      { name: 'Hantu', evidence: ['orb','freezing','uv'], strength: 'Más rápido en zonas frías.', weakness: 'Más lento en zonas cálidas; nunca enciende el cuadro.', hunt: 'Más peligroso con cuadro apagado' },
-      { name: 'Jinn', evidence: ['emf5','freezing','uv'], strength: 'Más rápido a distancia si el cuadro está encendido.', weakness: 'No puede usar habilidad con cuadro apagado; no apaga cuadro directamente.', hunt: 'Normal' },
-      { name: 'Mare', evidence: ['orb','spiritBox','writing'], strength: 'Caza antes en oscuridad.', weakness: 'Caza más tarde con luz.', hunt: 'Alto en oscuridad' },
-      { name: 'Moroi', evidence: ['spiritBox','freezing','writing'], strength: 'Más rápido con cordura media baja; maldice y drena cordura.', weakness: 'El incienso lo ciega más tiempo.', hunt: 'Escala con cordura' },
-      { name: 'Myling', evidence: ['emf5','uv','writing'], strength: 'Mucho más silencioso en caza; sonidos paranormales frecuentes en parabolic.', weakness: 'Nada clara, pero el rango de audio del hunt delata.', hunt: 'Normal' },
-      { name: 'Obake', evidence: ['emf5','orb','uv'], strength: 'Huellas especiales; cambia de modelo un instante en caza.', weakness: 'Puede no dejar UV y desaparecer antes.', hunt: 'Normal' },
-      { name: 'Obambo', evidence: ['uv','writing','dots'], strength: 'En estado agresivo caza antes y corre más.', weakness: 'En estado calmado caza más tarde y más lento.', hunt: 'Variable por estado' },
-      { name: 'Oni', evidence: ['emf5','freezing','dots'], strength: 'Muy activo cerca de jugadores; más visible en caza.', weakness: 'No puede hacer evento airball.', hunt: 'Normal' },
-      { name: 'Onryo', evidence: ['orb','spiritBox','freezing'], strength: 'Intenta cazar tras apagar 3 llamas.', weakness: 'Una llama cercana actúa como crucifijo.', hunt: 'Puede adelantar por velas' },
-      { name: 'Phantom', evidence: ['spiritBox','uv','dots'], strength: 'Mirarlo drena cordura; puede caminar hacia un jugador.', weakness: 'La foto hace que desaparezca; menos visible en caza.', hunt: 'Normal' },
-      { name: 'Poltergeist', evidence: ['spiritBox','uv','writing'], strength: 'Lanza varios objetos de golpe y muy fuerte.', weakness: 'Sin objetos cerca pierde fuelle.', hunt: 'Normal' },
-      { name: 'Raiju', evidence: ['emf5','orb','dots'], strength: 'Más rápido cerca de electrónicos activos; interfiere más lejos.', weakness: 'Sin electrónicos, normal.', hunt: 'Rápido con electrónicos' },
-      { name: 'Revenant', evidence: ['orb','freezing','writing'], strength: 'Rapidísimo si detecta objetivo.', weakness: 'Lentísimo si no detecta a nadie.', hunt: 'Extremos de velocidad' },
-      { name: 'Shade', evidence: ['emf5','freezing','writing'], strength: 'Muy poco activo.', weakness: 'No puede cazar si hay gente cerca.', hunt: 'Bajo y conservador' },
-      { name: 'Spirit', evidence: ['emf5','spiritBox','writing'], strength: 'Sin fortaleza especial.', weakness: 'El incienso bloquea caza durante más tiempo.', hunt: 'Normal' },
-      { name: 'Thaye', evidence: ['orb','writing','dots'], strength: 'Al principio muy activo y rápido.', weakness: 'Envejece y se vuelve lento y pasivo.', hunt: 'Alto al inicio' },
-      { name: 'The Mimic', evidence: ['spiritBox','freezing','uv'], strength: 'Copia rasgos y habilidades de otros.', weakness: 'Tiene orbes falsos como prueba secundaria.', hunt: 'Cualquiera; depende de lo que imite' },
-      { name: 'The Twins', evidence: ['emf5','spiritBox','freezing'], strength: 'Dos fuentes de interacción; uno rápido y otro lento.', weakness: 'No cazan a la vez.', hunt: 'Velocidad dual' },
-      { name: 'Wraith', evidence: ['emf5','spiritBox','dots'], strength: 'Se teleporta y no deja pisadas.', weakness: 'No pisa sal.', hunt: 'Normal' },
-      { name: 'Yokai', evidence: ['orb','spiritBox','dots'], strength: 'Hablar cerca puede hacerle cazar con cordura alta.', weakness: 'Oye mal durante la caza si no estás muy cerca.', hunt: 'Alto si habláis cerca' },
-      { name: 'Yurei', evidence: ['orb','freezing','dots'], strength: 'Drena cordura y le gusta cerrar puertas.', weakness: 'El incienso lo atrapa un rato y reduce roaming.', hunt: 'Normal' }
-    ];
+{name:"Poltergeist",ev:["SpiritBox","UV","Writing"],info:["Lanza objetos","Muy activo","Amontona objetos"]},
 
-    const maps = [
-      { name: '6 Tanglewood Drive', size: 'Pequeño', note: 'Mapa pequeño. Rework público del 3 de marzo de 2026.' },
-      { name: '42 Edgefield Road', size: 'Pequeño', note: 'Casa de varias plantas. Mucho sonido vertical.' },
-      { name: '10 Ridgeview Court', size: 'Pequeño', note: 'Casa amplia con buena separación de salas.' },
-      { name: "Nell's Diner", size: 'Pequeño', note: 'Mapa pequeño comercial. Zonas abiertas.' },
-      { name: 'Grafton Farmhouse', size: 'Pequeño', note: 'Viejo clásico con rutas incómodas.' },
-      { name: '13 Willow Street', size: 'Pequeño', note: 'Sótano útil para detectar caza y cambios de temperatura.' },
-      { name: 'Camp Woodwind', size: 'Pequeño', note: 'Compacto y rápido para farmear o probar hunts.' },
-      { name: 'Point Hope', size: 'Mediano', note: 'Vertical. Peligroso si pierdes la referencia de pisos.' },
-      { name: 'Bleasdale Farmhouse', size: 'Mediano', note: 'Más abierto que Grafton, pero igual de jodido para esconderse mal.' },
-      { name: 'Sunny Meadows Restricted', size: 'Mediano', note: 'Versión recortada. Buen equilibrio para grupo.' },
-      { name: 'Prison', size: 'Mediano', note: 'Mucho eco y localización por sonido complicada.' },
-      { name: 'Maple Lodge Campsite', size: 'Mediano', note: 'Exterior amplio; control de visión clave.' },
-      { name: 'Brownstone High School', size: 'Grande', note: 'Grande y lenta; mejor con reparto claro por zonas.' },
-      { name: 'Sunny Meadows Mental Institution', size: 'Grande', note: 'Grande de verdad. Sin coordinación, perdéis tiempo a lo tonto.' }
-    ];
+{name:"Banshee",ev:["UV","Orbs","DOTS"],info:["Objetivo único","Persigue a uno","Parabólica"]},
 
-    const defaultState = () => ({
-      evidence: Object.fromEntries(evidenceList.map(e => [e.key, 'unknown'])),
-      quickClues: [],
-      sanity: '',
-      matchName: '',
-      map: maps[0].name,
-      notes: ''
-    });
+{name:"Jinn",ev:["EMF","UV","Freezing"],info:["Rápido lejos","Depende de energía","Corta luz"]},
 
-    let state = loadState();
+{name:"Mare",ev:["SpiritBox","Orbs","Writing"],info:["Apaga luces","Ama oscuridad","Enciende luz"]},
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem('phasmo-buddy-state');
-        if (!raw) return defaultState();
-        return { ...defaultState(), ...JSON.parse(raw) };
-      } catch {
-        return defaultState();
-      }
-    }
+{name:"Revenant",ev:["Orbs","Writing","Freezing"],info:["Muy lento","Muy rápido","Linea visión"],speed:"Variable"},
 
-    function saveState(showToast = false) {
-      localStorage.setItem('phasmo-buddy-state', JSON.stringify(state));
-      renderShareCode();
-      if (showToast) alert('Guardado en este iPhone.');
-    }
+{name:"Shade",ev:["EMF","Writing","Freezing"],info:["Poco activo","Evita gente","Quédate solo"]},
 
-    function cycleEvidence(key) {
-      const order = ['unknown', 'yes', 'no'];
-      const current = state.evidence[key] || 'unknown';
-      state.evidence[key] = order[(order.indexOf(current) + 1) % order.length];
-      render();
-    }
+{name:"Demon",ev:["UV","Writing","Freezing"],info:["Hunt temprano","Agresivo","Cuidado temprano"]},
 
-    function toggleQuickClue(label) {
-      if (state.quickClues.includes(label)) {
-        state.quickClues = state.quickClues.filter(x => x !== label);
-      } else {
-        state.quickClues = [...state.quickClues, label];
-      }
-      render();
-    }
+{name:"Yurei",ev:["Orbs","Freezing","DOTS"],info:["Afecta cordura","Puertas","Observa puertas"]},
 
-    function setSanity(value) {
-      state.sanity = state.sanity === value ? '' : value;
-      render();
-    }
+{name:"Oni",ev:["EMF","Freezing","DOTS"],info:["Muy activo","Muchos eventos","Alta actividad"]},
 
-    function scoreGhost(ghost) {
-      let conflicts = 0;
-      let matches = 0;
-      evidenceList.forEach(e => {
-        const stateValue = state.evidence[e.key];
-        const has = ghost.evidence.includes(e.key);
-        if (stateValue === 'yes' && has) matches++;
-        if (stateValue === 'yes' && !has) conflicts++;
-        if (stateValue === 'no' && has) conflicts++;
-      });
-      return { matches, conflicts, possible: conflicts === 0 };
-    }
+{name:"Yokai",ev:["SpiritBox","Orbs","DOTS"],info:["Detecta voz","Cerca oye","Habla lejos"]},
 
-    function possibleGhosts() {
-      return ghosts
-        .map(g => ({ ...g, score: scoreGhost(g) }))
-        .sort((a, b) => {
-          if (a.score.possible !== b.score.possible) return a.score.possible ? -1 : 1;
-          if (a.score.matches !== b.score.matches) return b.score.matches - a.score.matches;
-          return a.name.localeCompare(b.name, 'es');
-        });
-    }
+{name:"Hantu",ev:["UV","Orbs","Freezing"],info:["Rápido frío","Lento calor","Controla temp"],speed:"Rápido"},
 
-    function renderEvidence() {
-      const grid = document.getElementById('evidenceGrid');
-      grid.innerHTML = '';
-      evidenceList.forEach(item => {
-        const btn = document.createElement('button');
-        btn.className = 'chip';
-        btn.dataset.state = state.evidence[item.key];
-        btn.innerHTML = `
-          <div style="text-align:left">
-            <strong>${item.label}</strong>
-            <small>${item.hint}</small>
-          </div>
-          <span class="state-dot"></span>
-        `;
-        btn.addEventListener('click', () => cycleEvidence(item.key));
-        grid.appendChild(btn);
-      });
-    }
+{name:"Goryo",ev:["EMF","UV","DOTS"],info:["DOTS cámara","No visible directo","Usa cámara"],rules:["dotsOnly"]},
 
-    function renderQuickClues() {
-      const wrap = document.getElementById('quickClues');
-      wrap.innerHTML = '';
-      quickClues.forEach(clue => {
-        const btn = document.createElement('button');
-        btn.className = 'ghost-pill';
-        btn.textContent = clue;
-        if (state.quickClues.includes(clue)) btn.classList.add('match');
-        btn.addEventListener('click', () => toggleQuickClue(clue));
-        wrap.appendChild(btn);
-      });
-    }
+{name:"Myling",ev:["EMF","UV","Writing"],info:["Silencioso","Pasos raros","Escucha bien"]},
 
-    function renderSanity() {
-      const wrap = document.getElementById('sanityButtons');
-      wrap.innerHTML = '';
-      sanityRanges.forEach(range => {
-        const btn = document.createElement('button');
-        btn.className = 'sanity-btn' + (state.sanity === range ? ' active' : '');
-        btn.textContent = range;
-        btn.addEventListener('click', () => setSanity(range));
-        wrap.appendChild(btn);
-      });
-      document.getElementById('sanityHint').textContent = state.sanity ? `Rango marcado: ${state.sanity}` : 'Sin rango seleccionado.';
-    }
+{name:"Onryo",ev:["SpiritBox","Orbs","Freezing"],info:["Fuego afecta","Caza por velas","Usa velas"]},
 
-    function renderGhosts() {
-      const list = document.getElementById('ghostList');
-      const shortList = document.getElementById('shortPossibleList');
-      const results = possibleGhosts();
-      const possibles = results.filter(g => g.score.possible);
+{name:"Twins",ev:["EMF","SpiritBox","Freezing"],info:["Dos acciones","Velocidad distinta","Observa doble"]},
 
-      document.getElementById('ghostCount').textContent = `${possibles.length} posibles`;
-      document.getElementById('possibleSummary').textContent =
-        possibles.length === 0 ? 'Has metido datos incompatibles. Revisa pruebas marcadas.' :
-        possibles.length === 1 ? `Ya solo queda ${possibles[0].name}.` :
-        `Siguen vivos ${possibles.length} fantasmas.`;
+{name:"Raiju",ev:["EMF","Orbs","DOTS"],info:["Rápido con electrónica","Acelera","Apaga equipo"],speed:"Rápido"},
 
-      shortList.innerHTML = '';
-      possibles.slice(0, 8).forEach(g => {
-        const pill = document.createElement('span');
-        pill.className = 'ghost-pill match';
-        pill.textContent = g.name;
-        shortList.appendChild(pill);
-      });
-      if (possibles.length > 8) {
-        const more = document.createElement('span');
-        more.className = 'ghost-pill maybe';
-        more.textContent = `+${possibles.length - 8} más`;
-        shortList.appendChild(more);
-      }
+{name:"Obake",ev:["EMF","UV","Orbs"],info:["Huellas raras","Cambios","Mira UV"]},
 
-      list.innerHTML = '';
-      results.forEach(ghost => {
-        const card = document.createElement('div');
-        card.className = 'ghost-card' + (ghost.score.possible ? '' : ' dim');
-        const badges = ghost.evidence.map(ev => {
-          const st = state.evidence[ev];
-          let cls = 'ghost-pill maybe';
-          if (st === 'yes') cls = 'ghost-pill match';
-          if (st === 'no') cls = 'ghost-pill conflict';
-          return `<span class="${cls}">${evidenceList.find(e => e.key === ev).label}</span>`;
-        }).join('');
-        const verdict = ghost.score.possible
-          ? `<span class="ghost-pill match">Encaja</span>`
-          : `<span class="ghost-pill conflict">Descartado</span>`;
-        card.innerHTML = `
-          <div class="ghost-name">
-            <strong>${ghost.name}</strong>
-            ${verdict}
-          </div>
-          <div class="badge-row">${badges}</div>
-          <p><strong>Fuerte:</strong> ${ghost.strength}</p>
-          <p><strong>Débil:</strong> ${ghost.weakness}</p>
-          <p class="muted"><strong>Caza:</strong> ${ghost.hunt}</p>
-        `;
-        list.appendChild(card);
-      });
-    }
+{name:"Mimic",ev:["SpiritBox","UV","Freezing"],info:["Orbes falsos","Imita","Busca orbes"]},
 
-    function renderMaps() {
-      const select = document.getElementById('mapSelect');
-      if (!select.options.length) {
-        maps.forEach(map => {
-          const opt = document.createElement('option');
-          opt.value = map.name;
-          opt.textContent = map.name;
-          select.appendChild(opt);
-        });
-      }
-      select.value = state.map;
+{name:"Moroi",ev:["SpiritBox","Writing","Freezing"],info:["Rápido cordura baja","Debilita","Toma pastillas"],speed:"Rápido"},
 
-      const selected = maps.find(m => m.name === state.map) || maps[0];
-      document.getElementById('selectedMapCard').innerHTML = `
-        <div class="map-item"><strong>${selected.name}</strong><br><span class="muted">${selected.size}</span><p>${selected.note}</p></div>
-      `;
+{name:"Deogen",ev:["SpiritBox","Writing","DOTS"],info:["Siempre detecta","Te sigue","Cerca lento"],speed:"Variable"},
 
-      const allMaps = document.getElementById('allMaps');
-      allMaps.innerHTML = '';
-      maps.forEach(map => {
-        const div = document.createElement('div');
-        div.className = 'map-item';
-        div.innerHTML = `<strong>${map.name}</strong><br><span class="muted">${map.size}</span><p>${map.note}</p>`;
-        div.addEventListener('click', () => {
-          state.map = map.name;
-          render();
-        });
-        allMaps.appendChild(div);
-      });
-    }
+{name:"Thaye",ev:["Orbs","Writing","DOTS"],info:["Rápido inicio","Envejece","Se vuelve lento"],speed:"Variable"}
 
-    function renderInputs() {
-      document.getElementById('matchName').value = state.matchName;
-      document.getElementById('notes').value = state.notes;
-    }
+];
 
-    function renderShareCode() {
-      const payload = {
-        v: 1,
-        ts: new Date().toISOString(),
-        data: state
-      };
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-      document.getElementById('shareCode').value = encoded;
-    }
+function toggle(k){
+  specials[k]=!specials[k];
+  render();
+}
 
-    function compareWithRemote() {
-      const raw = document.getElementById('importCode').value.trim();
-      const box = document.getElementById('compareResult');
-      if (!raw) {
-        box.textContent = 'Pega un código primero.';
-        return;
-      }
-      try {
-        const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
-        const remote = parsed.data;
-        const diffEvidence = evidenceList
-          .filter(e => (remote.evidence?.[e.key] || 'unknown') !== (state.evidence?.[e.key] || 'unknown'))
-          .map(e => `${e.label}: tú ${translateState(state.evidence[e.key])} / otro ${translateState(remote.evidence[e.key])}`);
+document.getElementById("speedBtn").onclick=()=>{
+  speedIndex=(speedIndex+1)%speedStates.length;
+  document.getElementById("speedBtn").textContent=speedStates[speedIndex];
+  render();
+};
 
-        const localPossible = possibleGhosts().filter(g => g.score.possible).map(g => g.name);
-        const remotePossible = ghosts.filter(g => {
-          let conflicts = 0;
-          evidenceList.forEach(e => {
-            const rv = remote.evidence?.[e.key] || 'unknown';
-            const has = g.evidence.includes(e.key);
-            if (rv === 'yes' && !has) conflicts++;
-            if (rv === 'no' && has) conflicts++;
-          });
-          return conflicts === 0;
-        }).map(g => g.name);
+function render(){
 
-        const shared = localPossible.filter(name => remotePossible.includes(name));
+let evDiv=document.getElementById("ev");
+evDiv.innerHTML="";
 
-        box.innerHTML = `
-          <p><strong>Partida remota:</strong> ${remote.matchName || 'sin nombre'}</p>
-          <p><strong>Diferencias de pruebas:</strong> ${diffEvidence.length ? diffEvidence.join(' · ') : 'ninguna'}</p>
-          <p><strong>Coincidencia de fantasmas posibles:</strong> ${shared.length ? shared.join(', ') : 'ninguna'}</p>
-          <p><strong>Notas remotas:</strong> ${remote.notes || 'sin notas'}</p>
-        `;
-      } catch {
-        box.textContent = 'Código inválido. Está roto o no es de esta app.';
-      }
-    }
+evidences.forEach(e=>{
+  let b=document.createElement("button");
+  b.textContent=e;
 
-    function loadRemoteIntoState() {
-      const raw = document.getElementById('importCode').value.trim();
-      if (!raw) return alert('Pega un código primero.');
-      try {
-        const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
-        state = { ...defaultState(), ...parsed.data };
-        render();
-        alert('Datos remotos cargados en la app.');
-      } catch {
-        alert('Código inválido.');
-      }
-    }
+  if(evState[e]==1)b.className="on";
+  if(evState[e]==2)b.className="off";
 
-    function translateState(value) {
-      if (value === 'yes') return 'confirmada';
-      if (value === 'no') return 'descartada';
-      return 'desconocida';
-    }
-
-    function bindTabs() {
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-          document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-          btn.classList.add('active');
-          document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
-        });
-      });
-    }
-
-    function bindEvents() {
-      document.getElementById('matchName').addEventListener('input', e => { state.matchName = e.target.value; renderShareCode(); });
-      document.getElementById('notes').addEventListener('input', e => { state.notes = e.target.value; renderShareCode(); });
-      document.getElementById('mapSelect').addEventListener('change', e => { state.map = e.target.value; render(); });
-      document.getElementById('saveBtn').addEventListener('click', () => saveState(true));
-      document.getElementById('newMatchBtn').addEventListener('click', () => {
-        state = defaultState();
-        render();
-      });
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        if (!confirm('Esto borra todo lo guardado en este iPhone.')) return;
-        localStorage.removeItem('phasmo-buddy-state');
-        state = defaultState();
-        render();
-      });
-      document.getElementById('refreshShareBtn').addEventListener('click', renderShareCode);
-      document.getElementById('copyShareBtn').addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(document.getElementById('shareCode').value);
-          alert('Código copiado.');
-        } catch {
-          alert('No se pudo copiar. Hazlo a mano.');
-        }
-      });
-      document.getElementById('compareBtn').addEventListener('click', compareWithRemote);
-      document.getElementById('loadRemoteBtn').addEventListener('click', loadRemoteIntoState);
-    }
-
-    function render() {
-      renderEvidence();
-      renderQuickClues();
-      renderSanity();
-      renderGhosts();
-      renderMaps();
-      renderInputs();
-      renderShareCode();
-    }
-
-    bindTabs();
-    bindEvents();
+  b.onclick=()=>{
+    evState[e]=(evState[e]+1)%3;
     render();
+  };
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-    }
-  </script>
+  evDiv.appendChild(b);
+});
+
+let gDiv=document.getElementById("ghosts");
+gDiv.innerHTML="";
+
+ghosts.forEach(g=>{
+
+let valid=true;
+let score=0;
+
+evidences.forEach(e=>{
+  if(evState[e]==1 && !g.ev.includes(e)) valid=false;
+  if(evState[e]==2 && g.ev.includes(e)) valid=false;
+});
+
+// especiales (DESCARTE REAL)
+if(specials.salt && g.rules?.includes("noSalt")) valid=false;
+if(specials.dots && g.rules?.includes("dotsOnly")) valid=false;
+
+// velocidad (peso)
+if(g.speed && g.speed===speedStates[speedIndex]) score++;
+
+let cls="ghost ";
+
+if(!valid) cls+="no";
+else if(score>0) cls+="sus";
+else cls+="ok";
+
+let d=document.createElement("div");
+
+d.className=cls;
+d.innerHTML=
+"<b>"+g.name+"</b><br>"+
+"<span class='small'>⚡ "+g.info[0]+"<br>🎯 "+g.info[1]+"<br>🧂 "+g.info[2]+"</span>";
+
+gDiv.appendChild(d);
+
+});
+
+}
+
+render();
+
+</script>
 </body>
 </html>
