@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Phasmo Buddy - V16 final</title>
+<title>Phasmo Buddy - V17 ficha emergente</title>
 <style>
 :root{--bg:#0b0f14;--panel:#151d27;--panel2:#1b2430;--line:#2d3a49;--text:#edf2f7;--muted:#9fb0c3;--green:#2fbe68;--green2:#163725;--red:#e05b5b;--red2:#3b1c1c;--yellow:#d8a13d;--yellow2:#473516;--card:#1a7d46;--cardHead:#0f1725;--shadow:0 10px 30px rgba(0,0,0,.35)}
 *{box-sizing:border-box}
@@ -13,7 +13,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);backgroun
 .title{font-size:1.35rem;font-weight:800}
 .subtitle{color:var(--muted);font-size:.92rem;margin-top:4px;max-width:820px}
 .heroActions{display:flex;gap:8px;flex-wrap:wrap}
-.actionBtn,.miniReset{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
+.actionBtn,.miniReset,.closeBtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
 .top{display:grid;grid-template-columns:1.08fr 1.3fr 1.3fr;gap:14px;align-items:start}
 .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
 .panelHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
@@ -40,7 +40,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);backgroun
 .ghostTitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pill{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.85rem}
 .ghostGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.ghostCard{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.ghostCard{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
 .ghostHead{background:var(--cardHead);padding:8px 10px;font-weight:800;font-size:.98rem;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .ghostName{min-width:0}
 .ghostEvs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
@@ -51,14 +51,27 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);backgroun
 .ghostBody{padding:8px 10px 10px;font-size:.82rem;line-height:1.35}
 .ghostBody div{margin:3px 0}
 .ghostEmpty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
+.modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modalBackdrop.show{display:flex}
+.modal{width:min(760px,100%);max-height:85vh;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.modalHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 14px 10px;border-bottom:1px solid var(--line);background:var(--cardHead)}
+.modalTitle{font-size:1.1rem;font-weight:800}
+.modalSub{color:var(--muted);font-size:.85rem;margin-top:4px}
+.modalContent{padding:14px;overflow:auto;display:grid;gap:14px}
+.modalSection{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.modalSection h4{margin:0 0 8px 0;font-size:.95rem}
+.tagRow{display:flex;gap:6px;flex-wrap:wrap}
+.tag{border:1px solid var(--line);background:#0f1722;border-radius:999px;padding:6px 8px;font-size:.82rem;display:inline-flex;align-items:center;gap:6px}
+.list{margin:0;padding-left:18px}
+.list li{margin:6px 0;line-height:1.35}
 @media (max-width:1020px){.top{grid-template-columns:1fr}.ghostGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:620px){.ghostGrid{grid-template-columns:1fr}.row.dual{grid-template-columns:1fr 50px 50px}.evidenceGrid{grid-template-columns:1fr}.split{grid-template-columns:1fr}}
+@media (max-width:620px){.ghostGrid{grid-template-columns:1fr}.row.dual{grid-template-columns:1fr 50px 50px}.evidenceGrid{grid-template-columns:1fr}.split{grid-template-columns:1fr}.modal{max-height:90vh}}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="hero">
-<div><div class="title">Phasmo Buddy</div><div class="subtitle">Versión integrada buena. Pruebas con iconos, fantasmas con iconos reactivos, rasgos cíclicos y binarios en dos columnas, filtros y vaciados funcionando.</div></div>
+<div><div class="title">Phasmo Buddy</div><div class="subtitle">Ahora cada fantasma abre una ficha emergente con scroll para leer cómodo toda la información sin salir de la pantalla principal.</div></div>
 <div class="heroActions"><button class="actionBtn" id="resetAllBtn">Vaciar todo</button></div>
 </div>
 
@@ -95,9 +108,22 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);backgroun
 
 <div class="ghostBar">
 <div class="ghostTitle"><div class="panelTitle">Fantasmas restantes</div><div class="pill" id="countPill">0 visibles</div></div>
-<div class="panelHint">Verde = prueba confirmada. Rojo = prueba descartada.</div>
+<div class="panelHint">Pulsa un fantasma para abrir su ficha.</div>
 </div>
 <div class="ghostGrid" id="ghostGrid"></div>
+</div>
+
+<div class="modalBackdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modalHeader">
+      <div>
+        <div class="modalTitle" id="modalName">Fantasma</div>
+        <div class="modalSub" id="modalSub">Ficha detallada</div>
+      </div>
+      <button class="closeBtn" id="closeModalBtn">Cerrar</button>
+    </div>
+    <div class="modalContent" id="modalContent"></div>
+  </div>
 </div>
 
 <script>
@@ -131,6 +157,33 @@ const ghosts=[
 {name:"Deogen",ev:["Spirit Box","Escritura","DOTS"],clues:["⚡ Siempre detecta","🎯 Te sigue","🧂 Cerca lento"],score:s=>s.speed===3?2:0},
 {name:"Thaye",ev:["Orbes","Escritura","DOTS"],clues:["⚡ Rápido inicio","🎯 Envejece","🧂 Se vuelve lento"],score:s=>(s.speed===3?2:0)+(s.toggles.time?2:0)}
 ];
+
+const ghostDetails={
+"Spirit":{summary:"Fantasma estándar. Suele no destacar demasiado por comportamiento.",strength:"Tras usar incienso tarda más que otros en volver a cazar.",weakness:"No tiene rasgos extremos que lo distingan rápido.",test:"Si cuadra por evidencias y no muestra nada raro, sospecha de Spirit.",notes:["Úsalo como opción base cuando otros rasgos especiales no aparecen.","El incienso es su test más útil."]},
+"Wraith":{summary:"Fantasma asociado a movimiento extraño y a no tocar el suelo.",strength:"Puede evitar la sal.",weakness:"Si pisa sal normal, queda fuera.",test:"Pon sal en ruta clara. Si la pisa, no es Wraith.",notes:["Uno de los descartes más fiables.","A veces parece moverse de forma poco natural."]},
+"Phantom":{summary:"Tiende a ser menos visible y a desaparecer en fotos.",strength:"Mirarlo mucho castiga más la cordura.",weakness:"Una foto puede revelar su rareza.",test:"Haz una foto durante evento o aparición para comparar comportamiento.",notes:["Suele sentirse menos visible que otros.","Buen candidato si desaparece al hacerle foto."]},
+"Poltergeist":{summary:"Especialista en lanzar objetos.",strength:"Puede generar mucha interacción con objetos.",weakness:"Pierde fuerza si no hay objetos cerca.",test:"Deja objetos agrupados y vigila si hace un estallido de actividad.",notes:["Si la sala está llena de objetos y se mueve todo, gana peso.","Muy útil en habitaciones con mucho material."]},
+"Banshee":{summary:"Puede obsesionarse con un solo jugador.",strength:"Selecciona objetivo único.",weakness:"Su comportamiento se nota mejor separando jugadores.",test:"Separad al equipo y observad si insiste siempre en la misma persona.",notes:["La parabólica también puede ayudar.","Muy distinta si el objetivo está claro."]},
+"Jinn":{summary:"Su velocidad depende de la energía y la distancia.",strength:"Acelera si el breaker está activo y la víctima está lejos.",weakness:"Con mala gestión eléctrica pierde parte de su ventaja.",test:"Corta la electricidad y compara hunt con breaker encendido.",notes:["Relaciona bien electricidad + velocidad.","No es solo un fantasma rápido sin más."]},
+"Mare":{summary:"Le gusta la oscuridad y castiga errores con las luces.",strength:"Puede presionar mejor con el entorno oscuro.",weakness:"Con buena iluminación pierde parte de su comodidad.",test:"Mantén luces encendidas y observa si insiste en apagarlas.",notes:["Muy asociado a apagar luces.","Cuadra bien si se siente cómodo en salas oscuras."]},
+"Revenant":{summary:"Cambio extremo de velocidad según te detecte o no.",strength:"Rapidísimo en persecución.",weakness:"Muy lento sin línea de visión.",test:"Rompe línea de visión y compara el cambio brusco de velocidad.",notes:["Uno de los fantasmas más claros por hunt.","Si el cambio es brutal, míralo primero."]},
+"Shade":{summary:"Fantasma tímido y de baja actividad relativa.",strength:"Menor tendencia a interacciones llamativas.",weakness:"Cuesta más sacarlo de forma agresiva.",test:"Sal de la sala o deja menos gente dentro para ver si gana actividad.",notes:["Suele sentirse apagado.","Encaja cuando todo va demasiado lento."]},
+"Demon":{summary:"Presiona antes y con más agresividad.",strength:"Puede cazar temprano.",weakness:"A veces el umbral de ataque ya lo delata.",test:"Controla cordura y momento de caza. Si empieza demasiado pronto, sube mucho.",notes:["Uno de los fantasmas más peligrosos.","La frecuencia de ataques puede delatarlo."]},
+"Yurei":{summary:"Relacionado con drenaje de cordura y puertas.",strength:"Puede afectar más a la cordura.",weakness:"No siempre se nota rápido.",test:"Observa puertas y caídas raras de cordura sin tanta explicación.",notes:["No es el más fácil de clavar solo por sensación.","Mejor usar junto a evidencias."]},
+"Oni":{summary:"Muy activo y con apariciones potentes.",strength:"Genera mucha actividad y eventos visibles.",weakness:"Se nota peor si la partida está muy tranquila.",test:"Provoca presencia y compara frecuencia de eventos.",notes:["Si todo el rato pasan cosas, piensa en Oni.","Buen candidato con parpadeo rápido."]},
+"Yokai":{summary:"Se altera con la voz cercana.",strength:"Hablar cerca puede acelerar el caos.",weakness:"Fuera de ese contexto pierde parte del tell.",test:"Hablad cerca y comparad si reacciona peor de lo normal.",notes:["Muy ligado al audio y proximidad.","No confundir con cualquier hunt temprano."]},
+"Hantu":{summary:"Fantasma muy ligado al frío.",strength:"Más rápido en entornos fríos.",weakness:"Pierde ventaja en zonas más cálidas.",test:"Compara hunts con diferencias térmicas y breaker.",notes:["Si notas velocidad + frío, gana peso rápido.","Muy asociado a congelación real."]},
+"Goryo":{summary:"El tell fuerte está en DOTS por cámara.",strength:"Su DOTS especial es bastante definitorio.",weakness:"Si lo ves normal a simple vista, se cae la opción.",test:"Usa cámara y observa DOTS sin estar encima.",notes:["Uno de los descartes más útiles.","No lo confundas con DOTS común."]},
+"Myling":{summary:"Muy ligado al sonido y a hunts silenciosos.",strength:"Puede parecer más silencioso que otros.",weakness:"Si lo escuchas claramente desde lejos, pierde fuerza.",test:"Escucha cuándo se perciben realmente sus pasos durante hunt.",notes:["El sonido es la clave.","Encaja bien si la sensación es rara al oído."]},
+"Onryo":{summary:"Muy relacionado con fuego y velas.",strength:"Su reacción al fuego puede delatarlo.",weakness:"Sin usar velas, cuesta más notarlo.",test:"Haz pruebas controladas con velas y observa el patrón.",notes:["No es de los más fáciles sin montar test.","Recompensa jugar a propósito con llama."]},
+"Twins":{summary:"Actividad partida y sensación de doble ritmo.",strength:"Puede parecer que pasan cosas en dos puntos.",weakness:"A veces se confunde con actividad normal caótica.",test:"Observa si hay acciones separadas o ritmos distintos en hunt.",notes:["Más útil por patrón general que por un único momento.","Puede parecer velocidad variable."]},
+"Raiju":{summary:"Potenciado por electrónica.",strength:"Acelera mucho con equipos encendidos.",weakness:"Si cortas electrónica, pierde parte del efecto.",test:"Apaga equipo cercano y compara velocidad.",notes:["Uno de los fantasmas más cómodos de probar.","Muy claro si juegas con dispositivos."]},
+"Obake":{summary:"Ligado a UV y huellas raras.",strength:"Las huellas especiales son su gran pista.",weakness:"Si no hay ventanas/puertas útiles, cuesta más verlo.",test:"Spamea UV en superficies de contacto y busca rarezas.",notes:["Muy dependiente de la evidencia correcta.","Gran tell si aparece."]},
+"Mimic":{summary:"Engaña con orbes falsos y copia comportamientos.",strength:"Puede parecer cualquier cosa.",weakness:"Los orbes falsos son su gran aviso.",test:"Si te encajan orbes con un set raro, revisa Mimic antes de nada.",notes:["Hay que sospecharlo pronto.","Es fácil caer en una falsa lectura."]},
+"Moroi":{summary:"Escala con cordura baja y puede sentirse cada vez peor.",strength:"Más peligroso cuanto peor va la cordura.",weakness:"Su lectura mejora al observar evolución.",test:"Compara hunts al principio y al bajar la cordura.",notes:["No lo juzgues solo por un hunt.","Piensa en progresión."]},
+"Deogen":{summary:"Siempre sabe dónde estás, pero se vuelve lento cerca.",strength:"Te encuentra sin esconderte realmente.",weakness:"A corta distancia se arrastra.",test:"No te escondas; deja que se acerque y mira cómo se frena.",notes:["Uno de los tells más claros del juego.","Muy fácil de confirmar si sabes qué hacer."]},
+"Thaye":{summary:"Empieza muy fuerte y se debilita con el tiempo.",strength:"Inicio agresivo y rápido.",weakness:"Pierde fuelle con el paso de los minutos.",test:"Compara primeras fases de partida con más tarde.",notes:["Muy ligado al tiempo.","Si envejece, cambia mucho la sensación de partida."]}
+};
 
 const svgIcons={
 "EMF":'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="#111722" stroke="#334357" stroke-width="1.2"/><rect x="5" y="12.5" width="14" height="3" rx="1.5" fill="#3ad889"/><circle cx="6.2" cy="8.2" r="1.5" fill="#ef5350"/><circle cx="9.5" cy="8.2" r="1.5" fill="#ff9f43"/><circle cx="12.8" cy="8.2" r="1.5" fill="#ffd166"/><circle cx="16.1" cy="8.2" r="1.5" fill="#8fd14f"/><circle cx="19.1" cy="8.2" r="1.3" fill="#6ae06a"/></svg>',
@@ -186,9 +239,26 @@ function renderGhosts(){
    const evHTML=g.ev.map(e=>`<div class="${evClass(e)}">${evidenceIcon(e)}</div>`).join("");
    const card=document.createElement("div"); card.className="ghostCard";
    card.innerHTML=`<div class="ghostHead"><div class="ghostName">${g.name}</div><div class="ghostEvs">${evHTML}</div></div><div class="ghostBody"><div>${g.clues[0]}</div><div>${g.clues[1]}</div><div>${g.clues[2]}</div></div>`;
+   card.onclick=()=>openGhostModal(g);
    wrap.appendChild(card);
  });
 }
+function openGhostModal(ghost){
+ const detail=ghostDetails[ghost.name]||{summary:"Sin detalle aún.",strength:"",weakness:"",test:"",notes:[]};
+ document.getElementById("modalName").textContent=ghost.name;
+ document.getElementById("modalSub").textContent="Ficha detallada con scroll";
+ const tags=ghost.ev.map(ev=>`<span class="tag"><span style="width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center">${evidenceIcon(ev)}</span>${ev}</span>`).join("");
+ const notes=(detail.notes||[]).map(n=>`<li>${n}</li>`).join("");
+ document.getElementById("modalContent").innerHTML=`
+<section class="modalSection"><h4>Evidencias</h4><div class="tagRow">${tags}</div></section>
+<section class="modalSection"><h4>Resumen</h4><ul class="list"><li>${detail.summary}</li></ul></section>
+<section class="modalSection"><h4>Fortaleza</h4><ul class="list"><li>${detail.strength || "Sin dato especial destacado."}</li></ul></section>
+<section class="modalSection"><h4>Debilidad o limitación</h4><ul class="list"><li>${detail.weakness || "Sin debilidad clara anotada."}</li></ul></section>
+<section class="modalSection"><h4>Test recomendado</h4><ul class="list"><li>${detail.test || "Combina hunt + evidencias para confirmarlo."}</li></ul></section>
+<section class="modalSection"><h4>Notas de conducta</h4><ul class="list">${notes || "<li>Sin notas extra.</li>"}</ul></section>`;
+ document.getElementById("modalBackdrop").classList.add("show");
+}
+function closeGhostModal(){document.getElementById("modalBackdrop").classList.remove("show");}
 function clearEvidence(){evidenceList.forEach(e=>state.evidence[e]=0);}
 function clearOther(){state.duals={silent:null,salt:null,rare:null,fuse:null}; state.toggles={los:false,temp:false,elec:false,time:false}; state.speed=0; state.blink=0;}
 function renderAll(){renderEvidenceRows(); renderSingles(); renderGhosts();}
@@ -204,6 +274,8 @@ document.getElementById("clearEvidenceBtn").onclick=()=>{clearEvidence(); render
 document.getElementById("clearCyclesBtn").onclick=()=>{state.speed=0; state.blink=0; renderAll();};
 document.getElementById("clearOtherBtn").onclick=()=>{clearOther(); renderAll();};
 document.getElementById("resetAllBtn").onclick=()=>{state=defaultState(); renderAll();};
+document.getElementById("closeModalBtn").onclick=closeGhostModal;
+document.getElementById("modalBackdrop").onclick=(e)=>{if(e.target.id==="modalBackdrop") closeGhostModal();};
 renderAll();
 </script>
 </body>
