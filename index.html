@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Phasmo Buddy - V25 dominante</title>
+<title>Phasmo Buddy - V27 guía</title>
 <style>
 :root{--bg:#0b0f14;--panel:#151d27;--panel2:#1b2430;--line:#2d3a49;--text:#edf2f7;--muted:#9fb0c3;--green:#2fbe68;--green2:#163725;--red:#e05b5b;--red2:#3b1c1c;--yellow:#d8a13d;--yellow2:#473516;--card:#1a7d46;--cardHead:#0f1725;--shadow:0 10px 30px rgba(0,0,0,.35)}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top,rgba(89,130,180,.12),transparent 35%),linear-gradient(180deg,var(--bg),#090c11 80%)}
@@ -22,7 +22,7 @@
 .ghostGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.ghostCard{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
 .ghostHead{background:var(--cardHead);padding:8px 10px;font-weight:800;font-size:.98rem;display:flex;justify-content:space-between;align-items:center;gap:8px}.ghostName{min-width:0}.ghostEvs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .evIcon{width:28px;height:24px;border-radius:7px;background:#0b0f14;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:2px}.evIcon svg{width:18px;height:18px;display:block}.evIcon.hit{background:var(--green2);border-color:var(--green)}.evIcon.miss{background:var(--red2);border-color:var(--red)}
-.ghostBody{padding:8px 10px 10px;font-size:.82rem;line-height:1.35}.ghostBody div{margin:3px 0}.ghostBody .score{color:#d7f6df;font-weight:700}.ghostEmpty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
+.ghostBody{padding:8px 10px 10px;font-size:.82rem;line-height:1.35}.ghostBody div{margin:3px 0}.ghostBody .score{color:#d7f6df;font-weight:700}.ghostBody .reasons{margin-top:6px;color:#dbe7f5;font-size:.78rem;line-height:1.3}.ghostBody .reason{display:block;opacity:.95}.ghostBody .guide{margin-top:6px;color:#f4e7bf;font-size:.78rem;line-height:1.3}.ghostBody .guideItem{display:block;opacity:.95}.ghostEmpty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.02)}
 .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modalBackdrop.show{display:flex}
 .modal{width:min(760px,100%);max-height:85vh;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 18%),var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
 .modalHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 14px 10px;border-bottom:1px solid var(--line);background:var(--cardHead)}.modalTitle{font-size:1.1rem;font-weight:800}.modalSub{color:var(--muted);font-size:.85rem;margin-top:4px}.modalContent{padding:14px;overflow:auto;display:grid;gap:14px}
@@ -33,7 +33,7 @@
 </head>
 <body>
 <div class="app">
-<div class="hero"><div><div class="title">Phasmo Buddy</div><div class="subtitle">V25 dominante. Misma app estable, con Mimic corregido, decisiones dominantes en casos claros y etiqueta de certeza integrada.</div></div><div class="heroActions"><button class="actionBtn" id="resetAllBtn">Vaciar todo</button></div></div>
+<div class="hero"><div><div class="title">Phasmo Buddy</div><div class="subtitle">V27 guía. Misma app estable, con certeza, razones y una guía de acción corta para confirmar o jugar mejor la situación.</div></div><div class="heroActions"><button class="actionBtn" id="resetAllBtn">Vaciar todo</button></div></div>
 <div class="top">
 <section class="panel"><div class="panelHead"><div><div class="panelTitle">Pruebas</div><div class="panelHint">Formato compacto en dos columnas con iconos</div></div><button class="miniReset" id="clearEvidenceBtn">Vaciar pruebas</button></div><div class="evidenceGrid" id="evidenceRows"></div></section>
 <section class="panel"><div class="panelHead"><div><div class="panelTitle">Rasgos cíclicos</div><div class="panelHint">Todo en dos columnas</div></div><button class="miniReset" id="clearCyclesBtn">Vaciar rasgos</button></div>
@@ -108,6 +108,141 @@ function certaintyColor(points){
   return '🔴';
 }
 function evClass(ev){const val=state.evidence[ev];if(val===1)return 'evIcon hit';if(val===2)return 'evIcon miss';return 'evIcon';}
+
+function getReasons(g){
+  const reasons=[];
+  if(g.name==='Demon' && state.duals.early==='yes') reasons.push('Hunt temprano');
+  if(g.name==='Demon' && state.duals.rare==='no') reasons.push('Alta agresividad');
+  if(g.name==='Mare' && state.duals.lights==='yes') reasons.push('Apaga luces');
+  if(g.name==='Mare' && state.duals.fuse==='off') reasons.push('Oscuridad / fusibles off');
+  if(g.name==='Myling' && state.duals.silent==='yes') reasons.push('Silencioso');
+  if(g.name==='Myling' && state.duals.far==='no') reasons.push('No se oye lejos');
+  if(g.name==='Jinn' && state.duals.fuse==='on') reasons.push('Fusibles ON');
+  if(g.name==='Jinn' && state.toggles.elec) reasons.push('Electricidad');
+  if(g.name==='Raiju' && state.toggles.elec) reasons.push('Electrónica activa');
+  if(g.name==='Raiju' && state.speed===2) reasons.push('Velocidad rápida');
+  if(g.name==='Hantu' && state.toggles.temp) reasons.push('Temperatura');
+  if(g.name==='Hantu' && state.speed===2) reasons.push('Velocidad rápida');
+  if(g.name==='Revenant' && state.toggles.los) reasons.push('Línea de visión');
+  if(g.name==='Revenant' && state.speed===3) reasons.push('Velocidad variable');
+  if(g.name==='Thaye' && state.toggles.time) reasons.push('Factor tiempo');
+  if(g.name==='Thaye' && state.speed===3) reasons.push('Velocidad variable');
+  if(g.name==='Deogen' && state.speed===3) reasons.push('Velocidad variable');
+  if(g.name==='Mimic' && state.evidence['Orbes']===1) reasons.push('Orbes');
+  if(g.name==='Wraith' && state.duals.salt==='no') reasons.push('No pisa sal');
+  if(g.name==='Goryo' && state.evidence['DOTS']===1) reasons.push('DOTS');
+  if(g.name==='Oni' && state.duals.rare==='no') reasons.push('Mucha actividad');
+  if(g.name==='Shade' && state.duals.rare==='yes') reasons.push('Poca actividad');
+  if(g.name==='Phantom' && state.blink===2) reasons.push('Parpadeo lento');
+  if(g.name==='Oni' && state.blink===1) reasons.push('Parpadeo rápido');
+  if(g.name==='Twins' && state.speed===3) reasons.push('Velocidad variable');
+  if(g.name==='Moroi' && state.toggles.time) reasons.push('Factor tiempo');
+  if(g.name==='Yokai' && state.duals.rare==='no') reasons.push('Alta actividad');
+  if(g.name==='Banshee' && state.duals.rare==='no') reasons.push('Conducta agresiva');
+  return reasons.slice(0,3);
+}
+
+function getGuide(g){
+  const guide=[];
+  const c = certaintyLevel(g.points);
+  if(c==='BAJA') return guide;
+
+  if(g.name==='Demon'){
+    guide.push('Prepárate para hunts tempranos');
+    guide.push('Controla cordura cuanto antes');
+  }
+  if(g.name==='Mare'){
+    guide.push('Mantén luces encendidas');
+    guide.push('Vigila si las apaga repetidamente');
+  }
+  if(g.name==='Myling'){
+    guide.push('Escucha pasos a distancia real');
+    guide.push('Compara cuándo empieza a oírse');
+  }
+  if(g.name==='Jinn'){
+    guide.push('Comprueba el breaker');
+    guide.push('Compara con fusibles ON y OFF');
+  }
+  if(g.name==='Raiju'){
+    guide.push('Apaga dispositivos cercanos');
+    guide.push('Observa si baja su velocidad');
+  }
+  if(g.name==='Hantu'){
+    guide.push('Controla temperatura y breaker');
+    guide.push('Compara hunts en frío');
+  }
+  if(g.name==='Revenant'){
+    guide.push('Rompe línea de visión');
+    guide.push('Mira si cambia brutalmente la velocidad');
+  }
+  if(g.name==='Thaye'){
+    guide.push('Compara inicio y final de partida');
+    guide.push('Observa si pierde fuerza con el tiempo');
+  }
+  if(g.name==='Deogen'){
+    guide.push('No te escondas; deja que se acerque');
+    guide.push('Confirma si se frena muchísimo cerca');
+  }
+  if(g.name==='Mimic'){
+    guide.push('Revisa si los Orbes te están engañando');
+    guide.push('Contrasta su conducta con otros tells');
+  }
+  if(g.name==='Wraith'){
+    guide.push('Pon sal en una ruta clara');
+    guide.push('Si la pisa, descártalo');
+  }
+  if(g.name==='Goryo'){
+    guide.push('Usa cámara para revisar DOTS');
+    guide.push('No lo confirmes solo por visión directa');
+  }
+  if(g.name==='Oni'){
+    guide.push('Busca actividad y eventos frecuentes');
+    guide.push('Si la partida se enfría, pierde fuerza');
+  }
+  if(g.name==='Shade'){
+    guide.push('Reduce presencia en la sala');
+    guide.push('Comprueba si solo actúa con poca gente');
+  }
+  if(g.name==='Phantom'){
+    guide.push('Haz una foto durante aparición');
+    guide.push('Observa si su presencia es menos visible');
+  }
+  if(g.name==='Twins'){
+    guide.push('Busca actividad en dos puntos');
+    guide.push('Compara ritmos o velocidades distintas');
+  }
+  if(g.name==='Moroi'){
+    guide.push('Compara hunts con distinta cordura');
+    guide.push('Mira si empeora con el tiempo');
+  }
+  if(g.name==='Yokai'){
+    guide.push('Hablad cerca y luego lejos');
+    guide.push('Compara si reacciona a la voz');
+  }
+  if(g.name==='Banshee'){
+    guide.push('Separad al grupo');
+    guide.push('Comprobad si insiste en una persona');
+  }
+  if(g.name==='Obake'){
+    guide.push('Revisa UV varias veces');
+    guide.push('Busca huellas raras o inconsistentes');
+  }
+  if(g.name==='Onryo'){
+    guide.push('Haz pruebas con velas');
+    guide.push('Observa su relación con el fuego');
+  }
+  if(g.name==='Poltergeist'){
+    guide.push('Junta objetos en la sala');
+    guide.push('Busca lanzamiento múltiple');
+  }
+  if(g.name==='Spirit'){
+    guide.push('Usa incienso y controla el siguiente hunt');
+  }
+  if(g.name==='Yurei'){
+    guide.push('Vigila puertas y cordura');
+  }
+  return guide.slice(0,2);
+}
 function renderGhosts(){const wrap=document.getElementById('ghostGrid');wrap.innerHTML='';const ranked=ghosts.filter(g=>evidenceValid(g)&&!isHardRuledOut(g)).map(g=>({...g,points:computeScore(g)})).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));document.getElementById('countPill').textContent=ranked.length+' visibles';if(!ranked.length){wrap.innerHTML='<div class="ghostEmpty">No queda ningún fantasma con los filtros actuales.</div>';return;}ranked.forEach(g=>{const evHTML=g.ev.map(e=>'<div class="'+evClass(e)+'">'+evidenceIcon(e)+'</div>').join('');const card=document.createElement('div');card.className='ghostCard';card.innerHTML='<div class="ghostHead"><div class="ghostName">'+g.name+'</div><div class="ghostEvs">'+evHTML+'</div></div><div class="ghostBody"><div>'+g.clues[0]+'</div><div>'+g.clues[1]+'</div><div>'+g.clues[2]+'</div><div class="score">Compatibilidad: '+g.points+'</div></div>';card.onclick=()=>openGhostModal(g);wrap.appendChild(card);});}
 function openGhostModal(ghost){const detail=ghostDetails[ghost.name]||{summary:'Ficha básica.',strength:'Sin detalle especial en esta tanda.',weakness:'Sin debilidad concreta anotada.',test:'Combina hunt + evidencias + rasgos.',notes:['Sin notas extra en esta versión.']};document.getElementById('modalName').textContent=ghost.name;document.getElementById('modalSub').textContent='Ficha detallada con scroll';const tags=ghost.ev.map(ev=>'<span class="tag"><span style="width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center">'+evidenceIcon(ev)+'</span>'+ev+'</span>').join('');const notes=(detail.notes||[]).map(n=>'<li>'+n+'</li>').join('');document.getElementById('modalContent').innerHTML='<section class="modalSection"><h4>Evidencias</h4><div class="tagRow">'+tags+'</div></section><section class="modalSection"><h4>Resumen</h4><ul class="list"><li>'+detail.summary+'</li></ul></section><section class="modalSection"><h4>Fortaleza</h4><ul class="list"><li>'+detail.strength+'</li></ul></section><section class="modalSection"><h4>Debilidad o limitación</h4><ul class="list"><li>'+detail.weakness+'</li></ul></section><section class="modalSection"><h4>Test recomendado</h4><ul class="list"><li>'+detail.test+'</li></ul></section><section class="modalSection"><h4>Notas de conducta</h4><ul class="list">'+notes+'</ul></section>';document.getElementById('modalBackdrop').classList.add('show');}
 function closeGhostModal(){document.getElementById('modalBackdrop').classList.remove('show');}
