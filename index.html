@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Phasmo Buddy - V23.3 corrección Myling</title>
+<title>Phasmo Buddy - V25 dominante</title>
 <style>
 :root{--bg:#0b0f14;--panel:#151d27;--panel2:#1b2430;--line:#2d3a49;--text:#edf2f7;--muted:#9fb0c3;--green:#2fbe68;--green2:#163725;--red:#e05b5b;--red2:#3b1c1c;--yellow:#d8a13d;--yellow2:#473516;--card:#1a7d46;--cardHead:#0f1725;--shadow:0 10px 30px rgba(0,0,0,.35)}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top,rgba(89,130,180,.12),transparent 35%),linear-gradient(180deg,var(--bg),#090c11 80%)}
@@ -33,7 +33,7 @@
 </head>
 <body>
 <div class="app">
-<div class="hero"><div><div class="title">Phasmo Buddy</div><div class="subtitle">V23.3 corrección Myling. Se corrige de verdad la penalización cuando marcas 'Silencioso = No'.</div></div><div class="heroActions"><button class="actionBtn" id="resetAllBtn">Vaciar todo</button></div></div>
+<div class="hero"><div><div class="title">Phasmo Buddy</div><div class="subtitle">V25 dominante. Misma app estable, con Mimic corregido, decisiones dominantes en casos claros y etiqueta de certeza integrada.</div></div><div class="heroActions"><button class="actionBtn" id="resetAllBtn">Vaciar todo</button></div></div>
 <div class="top">
 <section class="panel"><div class="panelHead"><div><div class="panelTitle">Pruebas</div><div class="panelHint">Formato compacto en dos columnas con iconos</div></div><button class="miniReset" id="clearEvidenceBtn">Vaciar pruebas</button></div><div class="evidenceGrid" id="evidenceRows"></div></section>
 <section class="panel"><div class="panelHead"><div><div class="panelTitle">Rasgos cíclicos</div><div class="panelHint">Todo en dos columnas</div></div><button class="miniReset" id="clearCyclesBtn">Vaciar rasgos</button></div>
@@ -63,9 +63,50 @@ function evidenceIcon(ev){return svgIcons[ev]||'';} function stateClass(v){retur
 function renderEvidenceRows(){const wrap=document.getElementById('evidenceRows');wrap.innerHTML='';evidenceList.forEach(name=>{const item=document.createElement('div');item.className='evidenceItem';const label=document.createElement('div');label.className='label';label.innerHTML='<div class="labelWithIcon"><div class="labelIcon">'+evidenceIcon(name)+'</div><div class="labelText">'+name+'</div></div>';const btn=document.createElement('div');btn.className=stateClass(state.evidence[name]);btn.onclick=()=>{state.evidence[name]=(state.evidence[name]+1)%3;renderAll();};item.appendChild(label);item.appendChild(btn);wrap.appendChild(item);});}
 function setDual(id,key,val){document.getElementById(id).className='btnSquare '+(state.duals[key]===val?'yes':'blank');}
 function renderSingles(){const speedMap=['?','L','R','V'],blinkMap=['?','R','L'];const speed=document.getElementById('speedCycle'),blink=document.getElementById('blinkCycle');speed.textContent=speedMap[state.speed];speed.className='btnSquare '+(state.speed===0?'blank cycle':'cycle');blink.textContent=blinkMap[state.blink];blink.className='btnSquare '+(state.blink===0?'blank cycle':'cycle');document.querySelectorAll('.toggleOne').forEach(el=>{const key=el.dataset.toggle;el.className='btnSquare '+(state.toggles[key]?'active toggleOne':'blank toggleOne');el.textContent=state.toggles[key]?'✓':'';});[['silent','silentYes','silentNo','yes','no'],['salt','saltYes','saltNo','yes','no'],['rare','rareYes','rareNo','yes','no'],['fuse','fuseOn','fuseOff','on','off'],['far','farYes','farNo','yes','no'],['lights','lightsYes','lightsNo','yes','no'],['early','earlyYes','earlyNo','yes','no']].forEach(([k,y,n,yv,nv])=>{setDual(y,k,yv);setDual(n,k,nv);});}
-function evidenceValid(ghost){for(const ev of evidenceList){const v=state.evidence[ev];if(v===1 && !ghost.ev.includes(ev)) return false;if(v===2 && ghost.ev.includes(ev)) return false;}return true;}
+function evidenceValid(ghost){for(const ev of evidenceList){const v=state.evidence[ev];if(v===1 && !ghost.ev.includes(ev)){
+        if(ghost.name==='Mimic' && ev==='Orbes') {
+            // allow Mimic special case
+        } else {
+            return false;
+        }
+    }if(v===2 && ghost.ev.includes(ev)) return false;}return true;}
 function isHardRuledOut(ghost){if(ghost.name==='Wraith'&&state.duals.salt==='yes') return true;if(ghost.name==='Goryo'&&state.toggles.los) return true;if(ghost.name==='Myling'&&state.duals.far==='yes') return true;if(ghost.name==='Jinn'&&state.duals.fuse==='off') return true;return false;}
-function computeScore(g){let s=0.2;if(g.name==='Phantom'&&state.blink===2)s+=2.5;if(g.name==='Oni'&&state.blink===1)s+=3.5;if(g.name==='Shade'&&state.duals.rare==='yes')s+=4;if(g.name==='Twins'&&state.speed===3)s+=2;if(g.name==='Banshee'&&state.duals.rare==='no')s+=1.5;if(g.name==='Yokai'&&state.duals.rare==='no')s+=1;if(state.duals.salt==='no'&&g.name==='Wraith')s+=3.5;if(state.evidence['Orbes']===1&&g.name==='Mimic')s+=4.5;if(state.speed===3){if(g.name==='Deogen')s+=4.5;if(g.name==='Revenant')s+=2.5;if(g.name==='Thaye')s+=1.5;if(g.name==='Twins')s+=1.5;}if(state.speed===2){if(g.name==='Raiju')s+=2.5;if(g.name==='Hantu')s+=2.5;if(g.name==='Moroi')s+=2;if(g.name==='Jinn')s+=1.2;}if(state.speed===1){if(g.name==='Revenant')s+=1.2;if(g.name==='Deogen')s+=1.5;}if(state.toggles.los){if(g.name==='Revenant')s+=4.5;if(g.name==='Deogen')s+=0.5;}if(state.toggles.time){if(g.name==='Thaye')s+=4.5;if(g.name==='Moroi')s+=2.5;if(g.name==='Deogen')s-=0.5;if(g.name==='Revenant')s-=0.3;}if(state.toggles.temp){if(g.name==='Hantu')s+=4;if(g.name==='Jinn')s+=0.4;}if(state.toggles.elec){if(g.name==='Raiju')s+=5;if(g.name==='Jinn')s+=1.5;}if(g.name==='Myling'&&state.duals.far==='no')s+=5.5;if(g.name==='Myling'&&state.duals.silent==='yes')s+=2;if(g.name==='Myling'&&state.duals.silent==='no')s-=5;if(g.name==='Mare'&&state.duals.lights==='yes')s+=5.5;if(g.name==='Demon'&&state.duals.early==='yes')s+=7;if(g.name==='Demon'&&state.duals.early==='no')s-=2;if(g.name==='Jinn'&&state.duals.fuse==='on')s+=4.5;if(g.name==='Hantu'&&state.duals.fuse==='off')s+=1.3;if(g.name==='Mare'&&state.duals.fuse==='off')s+=1.2;if(g.name==='Oni'&&state.duals.rare==='no')s+=4.5;if(g.name==='Oni'&&state.duals.rare==='yes')s-=1;if(g.name==='Shade'&&state.duals.rare==='no')s-=1.5;if(g.name==='Raiju'&&state.duals.fuse==='on')s+=0.4;if(g.name==='Raiju'&&state.duals.fuse==='off')s-=0.6;if(g.name==='Jinn'&&state.toggles.elec&&state.duals.fuse!=='on')s-=0.8;if(g.name==='Demon'&&state.duals.early==='yes'&&state.duals.rare==='no')s+=2;if(g.name==='Mare'&&state.duals.lights==='yes'&&state.duals.fuse==='off')s+=1.2;if(g.name==='Raiju'&&state.toggles.elec&&state.speed===2)s+=2;if(g.name==='Hantu'&&state.toggles.temp&&state.speed===2)s+=2;if(g.name==='Revenant'&&state.toggles.los&&state.speed===3)s+=2.5;if(g.name==='Thaye'&&state.toggles.time&&state.speed===3)s+=2.5;if(g.name==='Deogen'&&state.speed===3&&!state.toggles.time)s+=1.2;if(g.name==='Myling'&&state.duals.far==='yes')s-=2;if(g.name==='Mare'&&state.duals.lights==='no')s-=3;if(g.name==='Demon'&&state.duals.rare==='yes')s-=1;if(g.name==='Jinn'&&state.duals.fuse==='off')s-=5;return Math.round(s*10)/10;}
+function computeScore(g){let s=0.2;if(g.name==='Phantom'&&state.blink===2)s+=2.5;if(g.name==='Oni'&&state.blink===1)s+=3.5;if(g.name==='Shade'&&state.duals.rare==='yes')s+=4;if(g.name==='Twins'&&state.speed===3)s+=2;if(g.name==='Banshee'&&state.duals.rare==='no')s+=1.5;if(g.name==='Yokai'&&state.duals.rare==='no')s+=1;if(state.duals.salt==='no'&&g.name==='Wraith')s+=3.5;if(state.evidence['Orbes']===1&&g.name==='Mimic')s+=4.5;if(state.speed===3){if(g.name==='Deogen')s+=4.5;if(g.name==='Revenant')s+=2.5;if(g.name==='Thaye')s+=1.5;if(g.name==='Twins')s+=1.5;}if(state.speed===2){if(g.name==='Raiju')s+=2.5;if(g.name==='Hantu')s+=2.5;if(g.name==='Moroi')s+=2;if(g.name==='Jinn')s+=1.2;}if(state.speed===1){if(g.name==='Revenant')s+=1.2;if(g.name==='Deogen')s+=1.5;}if(state.toggles.los){if(g.name==='Revenant')s+=4.5;if(g.name==='Deogen')s+=0.5;}if(state.toggles.time){if(g.name==='Thaye')s+=4.5;if(g.name==='Moroi')s+=2.5;if(g.name==='Deogen')s-=0.5;if(g.name==='Revenant')s-=0.3;}if(state.toggles.temp){if(g.name==='Hantu')s+=4;if(g.name==='Jinn')s+=0.4;}if(state.toggles.elec){if(g.name==='Raiju')s+=5;if(g.name==='Jinn')s+=1.5;}if(g.name==='Myling'&&state.duals.far==='no')s+=5.5;if(g.name==='Myling'&&state.duals.silent==='yes')s+=2;if(g.name==='Myling'&&state.duals.silent==='no')s-=5;if(g.name==='Mare'&&state.duals.lights==='yes')s+=5.5;if(g.name==='Demon'&&state.duals.early==='yes')s+=7;if(g.name==='Demon'&&state.duals.early==='no')s-=2;if(g.name==='Jinn'&&state.duals.fuse==='on')s+=4.5;if(g.name==='Hantu'&&state.duals.fuse==='off')s+=1.3;if(g.name==='Mare'&&state.duals.fuse==='off')s+=1.2;if(g.name==='Oni'&&state.duals.rare==='no')s+=4.5;if(g.name==='Oni'&&state.duals.rare==='yes')s-=1;if(g.name==='Shade'&&state.duals.rare==='no')s-=1.5;if(g.name==='Raiju'&&state.duals.fuse==='on')s+=0.4;if(g.name==='Raiju'&&state.duals.fuse==='off')s-=0.6;if(g.name==='Jinn'&&state.toggles.elec&&state.duals.fuse!=='on')s-=0.8;if(g.name==='Demon'&&state.duals.early==='yes'&&state.duals.rare==='no')s+=2;if(g.name==='Mare'&&state.duals.lights==='yes'&&state.duals.fuse==='off')s+=1.2;if(g.name==='Raiju'&&state.toggles.elec&&state.speed===2)s+=2;if(g.name==='Hantu'&&state.toggles.temp&&state.speed===2)s+=2;if(g.name==='Revenant'&&state.toggles.los&&state.speed===3)s+=2.5;if(g.name==='Thaye'&&state.toggles.time&&state.speed===3)s+=2.5;if(g.name==='Deogen'&&state.speed===3&&!state.toggles.time)s+=1.2;if(g.name==='Myling'&&state.duals.far==='yes')s-=2;if(g.name==='Mare'&&state.duals.lights==='no')s-=3;if(g.name==='Demon'&&state.duals.rare==='yes')s-=1;if(g.name==='Jinn'&&state.duals.fuse==='off')s-=5;
+
+// Dominancia en casos claros
+if(state.duals.early==='yes'){
+  if(g.name==='Demon') s+=5;
+  else s-=0.7;
+}
+if(state.toggles.elec && state.speed===2){
+  if(g.name==='Raiju') s+=4;
+  else s-=0.5;
+}
+if(state.toggles.temp && state.speed===2){
+  if(g.name==='Hantu') s+=4;
+  else s-=0.5;
+}
+if(state.toggles.los && state.speed===3){
+  if(g.name==='Revenant') s+=4;
+  else s-=0.5;
+}
+if(state.toggles.time && state.speed===3){
+  if(g.name==='Thaye') s+=4;
+  else s-=0.5;
+}
+
+return Math.round(s*10)/10;}
+
+function certaintyLevel(points){
+  if(points >= 10) return 'ALTA';
+  if(points >= 5) return 'MEDIA';
+  return 'BAJA';
+}
+function certaintyColor(points){
+  if(points >= 10) return '🟢';
+  if(points >= 5) return '🟡';
+  return '🔴';
+}
 function evClass(ev){const val=state.evidence[ev];if(val===1)return 'evIcon hit';if(val===2)return 'evIcon miss';return 'evIcon';}
 function renderGhosts(){const wrap=document.getElementById('ghostGrid');wrap.innerHTML='';const ranked=ghosts.filter(g=>evidenceValid(g)&&!isHardRuledOut(g)).map(g=>({...g,points:computeScore(g)})).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name));document.getElementById('countPill').textContent=ranked.length+' visibles';if(!ranked.length){wrap.innerHTML='<div class="ghostEmpty">No queda ningún fantasma con los filtros actuales.</div>';return;}ranked.forEach(g=>{const evHTML=g.ev.map(e=>'<div class="'+evClass(e)+'">'+evidenceIcon(e)+'</div>').join('');const card=document.createElement('div');card.className='ghostCard';card.innerHTML='<div class="ghostHead"><div class="ghostName">'+g.name+'</div><div class="ghostEvs">'+evHTML+'</div></div><div class="ghostBody"><div>'+g.clues[0]+'</div><div>'+g.clues[1]+'</div><div>'+g.clues[2]+'</div><div class="score">Compatibilidad: '+g.points+'</div></div>';card.onclick=()=>openGhostModal(g);wrap.appendChild(card);});}
 function openGhostModal(ghost){const detail=ghostDetails[ghost.name]||{summary:'Ficha básica.',strength:'Sin detalle especial en esta tanda.',weakness:'Sin debilidad concreta anotada.',test:'Combina hunt + evidencias + rasgos.',notes:['Sin notas extra en esta versión.']};document.getElementById('modalName').textContent=ghost.name;document.getElementById('modalSub').textContent='Ficha detallada con scroll';const tags=ghost.ev.map(ev=>'<span class="tag"><span style="width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center">'+evidenceIcon(ev)+'</span>'+ev+'</span>').join('');const notes=(detail.notes||[]).map(n=>'<li>'+n+'</li>').join('');document.getElementById('modalContent').innerHTML='<section class="modalSection"><h4>Evidencias</h4><div class="tagRow">'+tags+'</div></section><section class="modalSection"><h4>Resumen</h4><ul class="list"><li>'+detail.summary+'</li></ul></section><section class="modalSection"><h4>Fortaleza</h4><ul class="list"><li>'+detail.strength+'</li></ul></section><section class="modalSection"><h4>Debilidad o limitación</h4><ul class="list"><li>'+detail.weakness+'</li></ul></section><section class="modalSection"><h4>Test recomendado</h4><ul class="list"><li>'+detail.test+'</li></ul></section><section class="modalSection"><h4>Notas de conducta</h4><ul class="list">'+notes+'</ul></section>';document.getElementById('modalBackdrop').classList.add('show');}
